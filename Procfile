@@ -1,1 +1,1 @@
-updater: $JVM_OPTS lein run -m followersdb.updatefollowers $HANDLE
+updater: lein run -m followersdb.updatefollowers $HANDLE

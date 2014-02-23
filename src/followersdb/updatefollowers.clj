@@ -1,4 +1,7 @@
 (ns followersdb.updatefollowers)
 
 (defn -main [& args]
-  (println "Updating followers"))
+  (if (nil? args)
+    (do (println "No handle specified!"))
+    (do
+    (println (str "Updating followers of " (first args))))))

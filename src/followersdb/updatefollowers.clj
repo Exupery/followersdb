@@ -41,16 +41,16 @@
                   ["INSERT INTO followers SELECT ? WHERE NOT EXISTS (SELECT 1 FROM followers WHERE id=?)"
                    (:id follower)
                    (:id follower)])
-    ;TODO add or update fields
-
-    (println (:screen_name follower)) ;DELME
-    (println (:name follower)) ;DELME
-    (println (:location follower)) ;DELME
-    (println (:created_at follower)) ;DELME
-    (println (:listed_count follower)) ;DELME
-    (println (:friends_count follower)) ;DELME
-    (println (:followers_count follower)) ;DELME
-    (println (:statuses_count follower)) ;DELME
-    (println (:verified follower)) ;DELME
-    (println (:utc_offset follower)));DELME
+    (sql/update! db :followers {:screen_name (:screen_name follower)
+                                :name (:name follower)
+                                :location (:location follower)
+                                ;TODO parse join date
+                                ;:joined_twitter (:created_at follower)
+                                :listed (:listed_count follower)
+                                :following (:friends_count follower)
+                                :followers (:followers_count follower)
+                                :tweets (:statuses_count follower)
+                                :verified (:verified follower)
+                                :utc_offset_seconds (:utc_offset follower)
+                                } ["id=?" (:id follower)]))
     followers)))

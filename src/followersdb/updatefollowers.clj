@@ -34,8 +34,19 @@
 
 (def db (System/getenv "DB_URL"))
 
+(defn unfollowers [followers]
+  (remove nil? (let [current (set (map (fn [follower] (:id follower)) followers))]
+    (sql/query db
+               ["SELECT id FROM followers WHERE stopped_following IS NULL"]
+               :row-fn (fn [row]
+                         (if (false? (contains? current (:id row)))
+                           (:id row)))))))
+
 (defn dbwrite [followers]
-  ;TODO update unfollowers
+  (dorun (map (fn [unfollower]
+    (sql/execute! db
+                  ["UPDATE followers SET stopped_following=NOW() WHERE id=?"
+                   unfollower])) (unfollowers followers)))
   (dorun (map (fn [follower]
     (sql/execute! db
                   ["INSERT INTO followers SELECT ? WHERE NOT EXISTS (SELECT 1 FROM followers WHERE id=?)"
@@ -52,5 +63,4 @@
                                 :tweets (:statuses_count follower)
                                 :verified (:verified follower)
                                 :utc_offset_seconds (:utc_offset follower)
-                                } ["id=?" (:id follower)]))
-    followers)))
+                                } ["id=?" (:id follower)])) followers)))

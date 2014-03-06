@@ -1,6 +1,7 @@
 (ns followersdb.updatefollowers
   (:use
    [clojure.java.jdbc :as sql]
+   [clj-time.format :as cljf]
    [twitter.oauth]
    [twitter.api.restful]))
 
@@ -42,6 +43,11 @@
                          (if (false? (contains? current (:id row)))
                            (:id row)))))))
 
+(def custom-formatter (cljf/formatter "EEE MMM dd HH:mm:ss Z yyyy"))
+
+(defn parse-time [timestamp]
+  (java.sql.Timestamp/valueOf (cljf/unparse (formatters :mysql) (cljf/parse custom-formatter timestamp))))
+
 (defn dbwrite [followers]
   (dorun (map (fn [unfollower]
     (sql/execute! db
@@ -55,8 +61,7 @@
     (sql/update! db :followers {:screen_name (:screen_name follower)
                                 :name (:name follower)
                                 :location (:location follower)
-                                ;TODO parse join date
-                                ;:joined_twitter (:created_at follower)
+                                :joined_twitter (parse-time (:created_at follower))
                                 :listed (:listed_count follower)
                                 :following (:friends_count follower)
                                 :followers (:followers_count follower)
